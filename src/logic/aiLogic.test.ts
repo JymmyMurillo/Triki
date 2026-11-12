@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 
-import { getAvailableMoves, getRandomMove } from "./aiLogic";
+import { getAvailableMoves, getMediumMove, getRandomMove } from "./aiLogic";
 
 import type { Board } from "../types/game.types";
 
@@ -77,4 +77,98 @@ describe("getRandomMove", () => {
     expect(getRandomMove(board)).toBe(8);
   });
 });
-  
+  // ==========================================
+// NIVEL MEDIO: INTELIGENCIA ESTRATÉGICA
+// ==========================================
+
+describe('getMediumMove', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('should prioritize winning over blocking', () => {
+    const board: Board = [
+      'O', 'O', null,
+      'X', 'X', null,
+      null, null, null,
+    ];
+
+    expect(getMediumMove(board, 'O')).toBe(2);
+  });
+
+  it('should win when a winning move is available', () => {
+    const board: Board = [
+      'O', 'O', null,
+      'X', null, null,
+      'X', null, null,
+    ];
+
+    expect(getMediumMove(board, 'O')).toBe(2);
+  });
+
+  it('should block the opponent from winning', () => {
+    const board: Board = [
+      'X', 'X', null,
+      'O', null, null,
+      null, 'O', null,
+    ];
+
+    expect(getMediumMove(board, 'O')).toBe(2);
+  });
+
+  it('should detect a winning move for player X', () => {
+    const board: Board = [
+      'X', null, 'O',
+      'X', 'O', null,
+      null, null, null,
+    ];
+
+    expect(getMediumMove(board, 'X')).toBe(6);
+  });
+
+  it('should select a random available move when there are no threats', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    const board: Board = [
+      'X', null, null,
+      null, 'O', null,
+      null, null, null,
+    ];
+
+    expect(getMediumMove(board, 'O')).toBe(1);
+  });
+
+  it('should return null when the board is full', () => {
+    const board: Board = [
+      'X', 'O', 'X',
+      'X', 'O', 'O',
+      'O', 'X', 'X',
+    ];
+
+    expect(getMediumMove(board, 'O')).toBeNull();
+  });
+
+  it('should return null when the game already has a winner', () => {
+    const board: Board = [
+      'X', 'X', 'X',
+      'O', 'O', null,
+      null, null, null,
+    ];
+
+    expect(getMediumMove(board, 'O')).toBeNull();
+  });
+
+  it('should not modify the original board', () => {
+    const board: Board = [
+      'X', 'X', null,
+      'O', null, null,
+      null, 'O', null,
+    ];
+
+    const originalBoard = [...board];
+
+    getMediumMove(board, 'O');
+
+    expect(board).toEqual(originalBoard);
+  });
+});
